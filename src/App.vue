@@ -5,6 +5,7 @@
   <div className='smallImg'></div>
   <!-- 大图片背景容器 -->
   <div className='bigImg'></div>
+  <div> 修改App.vue</div>
 </template>
 
 <script setup lang="ts">
