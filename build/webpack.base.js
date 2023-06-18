@@ -34,7 +34,7 @@ module.exports = {
           isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
           'postcss-loader'
-        ]
+        ],
       },
       {
         test: /\.less$/, //匹配所有的 less 文件

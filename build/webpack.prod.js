@@ -6,6 +6,9 @@ const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
+const globAll = require('glob-all')
+const { PurgeCSSPlugin } = require('purgecss-webpack-plugin')
+const CompressionPlugin  = require('compression-webpack-plugin')
 
 module.exports = merge(baseConfig, {
   mode: 'production', // 生产模式,会开启tree-shaking和压缩代码,以及其他优化
@@ -22,8 +25,16 @@ module.exports = merge(baseConfig, {
       ],
     }),
     new MiniCssExtractPlugin({
-      filename: 'static/css/[name].css' // 抽离css的输出目录和名称
+      filename: 'static/css/[name].[contenthash:8].css' // 抽离css的输出目录和名称
     }),
+    new CompressionPlugin({
+      test: /\.(js|css)$/, // 只生成css,js压缩文件
+      filename: '[path][base].gz', // 文件命名
+      algorithm: 'gzip', // 压缩格式,默认是gzip
+      test: /\.(js|css)$/, // 只生成css,js压缩文件
+      threshold: 10240, // 只有大小大于该值的资源会被处理。默认值是 10k
+      minRatio: 0.8 // 压缩率,默认值是 0.8
+    })
   ],
   optimization: {
     minimizer: [
@@ -35,6 +46,15 @@ module.exports = merge(baseConfig, {
             pure_funcs: ["console.log"] // 删除console.log
           }
         }
+      }),
+       // 清理无用css
+      new PurgeCSSPlugin({
+        // 检测src下所有vue文件和public下index.html中使用的类名和id和标签名称
+        // 只打包这些文件中用到的样式
+        paths: globAll.sync([
+          `${path.join(__dirname, '../src')}/**/*.vue`,
+          path.join(__dirname, '../public/index.html')
+        ]),
       }),
     ],
     splitChunks: { // 分隔代码
